@@ -28,11 +28,11 @@ RUN gem install \
         awesome_print \
         ethereum.rb \
         webrick \
-        eth \
         logger \
         graphviz \
         faraday \
         vega
+RUN gem install eth -v '0.4.17'
 
 RUN ln -s $(which python3) /usr/local/bin/python
 RUN ln -s $(which pip3) /usr/local/bin/pip
