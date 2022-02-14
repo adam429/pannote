@@ -1,3 +1,7 @@
+# docker build -t adam429/pan-repo:panworker .
+# docker push adam429/pan-repo:panworker
+# docker container run -d -e DB_CONNECT_STR='xxx' -e WORKER_NAME='worker' --name panworker adam429/pan-repo:panworker
+
 FROM ruby:2.7.5 AS base
 RUN apt-get update -qq && apt-get install -y nodejs postgresql-client
 RUN apt-get update -qq && apt-get install -y python3 python3-pip python3-venv
@@ -33,3 +37,13 @@ RUN gem install \
         faraday \
         vega
 RUN gem install eth -v '0.4.17'
+
+WORKDIR /panworker
+# COPY Gemfile /panscan/Gemfile
+# COPY Gemfile.lock /panscan/Gemfile.lock
+COPY panworker.rb /panworker/panworker.rb
+COPY panbot_note.rb /panworker/panbot_note.rb
+
+# Configure the main process to run when running the image
+CMD ["ruby", "panworker.rb"]
+
