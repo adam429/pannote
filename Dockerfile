@@ -31,7 +31,8 @@ RUN gem install \
         logger \
         graphviz \
         faraday \
-        vega
+        vega \
+        resolv-replace
 RUN gem install eth -v '0.4.17'
 
 RUN ln -s $(which python3) /usr/local/bin/python

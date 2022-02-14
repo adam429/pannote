@@ -5,6 +5,7 @@ require 'eth'
 require 'faraday'
 require 'histogram/array' 
 require 'parallel'
+require 'resolv-replace'
 require 'vega'
 
 ActiveRecord::Base.establish_connection(ENV["DB_CONNECT_STR"])
