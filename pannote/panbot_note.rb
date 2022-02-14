@@ -38,5 +38,5 @@ code = """
     }
   end
 """
-run_code(code,"readonly")
+run_code(code,"readonly") if not $data_import
 
