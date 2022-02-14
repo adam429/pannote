@@ -8,6 +8,12 @@ require 'parallel'
 require 'resolv-replace'
 require 'vega'
 
+
+contract_name = "PancakePredictionV2"
+contract_addr = "0x18B2A687610328590Bc8F2e5fEdDe3b582A49cdA".downcase
+bscscan_apikey = "HIFNPQFV6MY755QMVPFIAY7F25RUTHI26Z"
+
+
 ActiveRecord::Base.establish_connection(ENV["DB_CONNECT_STR"])
 
 def run_code(code,model)
@@ -40,4 +46,18 @@ code = """
   end
 """
 run_code(code,"readonly") if not $data_import
+
+
+
+$client = Ethereum::HttpClient.new(ENV["HTTP_ENDPOINT"])
+
+api_url = "https://api.bscscan.com/api?module=contract&action=getabi&address=#{contract_addr}&apikey=#{bscscan_apikey}"
+abi = JSON.parse(JSON.parse(response = Faraday.get(api_url).body)["result"])
+
+$contract = Ethereum::Contract.create(
+        client: $client, 
+        name: contract_name, 
+        address: contract_addr, 
+        abi: abi)
+
 
