@@ -61,3 +61,38 @@ $contract = Ethereum::Contract.create(
         abi: abi)
 
 
+def address_graph_expand(addr,exclude)
+  addr_list = addr.map {|x| x.to_a[0][1]}.uniq
+
+  expend_all_addr = Transfer.where(from:addr_list).map {|x| x.to} + Transfer.where(to:addr_list).map {|x| x.from} + addr_list
+  expend_addr = expend_all_addr.uniq.filter { |x| not exclude[x]}
+  ret = expend_addr.map {|x| [["(input)",x]].to_h }
+      
+  return ret
+end
+
+def to_graph(addr,min_amount=0, max_connect=100)
+  addr_list = addr.map {|x| x.to_a[0][1]}.uniq
+
+  exclude_addr = addr_list.map { |addr|
+      [addr, Transfer.where(from:addr).count, Transfer.where(to:addr).count, Transfer.where(from:addr).sum(:amount)/1e18, Transfer.where(to:addr).sum(:amount)/1e18]
+  }.filter{ |x| x[2]>max_connect and x[1]>max_connect}
+
+  addr_list = addr_list.filter {|x| not exclude_addr.map{|x| x[0]}.include?(x) }
+
+  graph = "digraph {\n" +  
+    exclude_addr.map {|addr| 
+      x=Address.find_by_addr(addr[0]);  
+      %Q( "#{x.tag ? x.tag + ' @'+x.addr[-4,4] : x.addr }" [shape=doubleoctagon style=filled] ) + ";\n" + 
+      %Q( "group @#{x.addr[-4,4]} trans #{addr[1]+addr[2]}"[style=filled] ) + ";\n" +
+      %Q( "#{x.tag ? x.tag + ' @'+x.addr[-4,4] : x.addr }" -> "group @#{x.addr[-4,4]} trans #{addr[1]+addr[2]}" [label=#{addr[3].round(2)}] ) + ";\n" +
+      %Q( "group @#{x.addr[-4,4]} trans #{addr[1]+addr[2]}" -> "#{x.tag ? x.tag + ' @'+x.addr[-4,4] : x.addr }" [label=#{addr[4].round(2)}] ) + ";\n"
+    }.join("") + 
+    Transfer.where(from:addr_list).where(to:addr_list).where("amount > ?",min_amount * 1e18).map {|x|
+      %Q( "#{x.ar_from.tag ? x.ar_from.tag + ' @'+x.from[-4,4] : x.from }" -> "#{ x.ar_to.tag ? x.ar_to.tag + ' @'+x.to[-4,4] : x.to}" [label=#{(x.amount/1e18).round(2)}] )
+    }.join(";\n") + "\n}"
+  url = "https://quickchart.io/graphviz?graph=#{graph.gsub(/\n/,"")}"
+  body = Faraday.get(url).body
+  IRuby.html body
+end
+
