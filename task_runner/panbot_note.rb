@@ -22,7 +22,7 @@ def run_code(code,model)
 end
 
 ## load data model from github
-models = ["application_record","address","cache","block","epoch","epoch_detail","event","transfer","tx","task"]
+models = ["application_record","address","cache","block","epoch","epoch_detail","event","transfer","tx","log","task"]
 models.each do |model| 
   url = "https://raw.githubusercontent.com/adam429/panscan/main/panscan/app/models/#{model}.rb"
   body = Faraday.get(url).body
