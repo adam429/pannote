@@ -71,28 +71,33 @@ def address_graph_expand(addr,exclude)
   return ret
 end
 
-def to_graph(addr,min_amount=0, max_connect=100)
-  addr_list = addr.map {|x| x.to_a[0][1]}.uniq
 
-  exclude_addr = addr_list.map { |addr|
-      [addr, Transfer.where(from:addr).count, Transfer.where(to:addr).count, Transfer.where(from:addr).sum(:amount)/1e18, Transfer.where(to:addr).sum(:amount)/1e18]
-  }.filter{ |x| x[2]>max_connect and x[1]>max_connect}
+def auto_tag_name(addr,name)
+    puts name
+    addr_list = addr.map {|x| x.to_a[0][1]}.uniq
 
-  addr_list = addr_list.filter {|x| not exclude_addr.map{|x| x[0]}.include?(x) }
+    bet_transfer_ratio = Address.where(addr:addr_list).map {|x|
+        call_method_count = Tx.where('"to"=? or "from"=?',x.addr,x.addr).where("method_name=? or method_name=?","betBear","betBull").count; 
+        transfer_count = Transfer.where('"to"=? or "from"=?',x.addr,x.addr).where(method_name:"Transfer").count; 
+        [x.addr, call_method_count ,transfer_count ]
+    }
+    .map {|x| [x[0],x[1].to_f/x[2],x[1],x[2]]}
+    .sort {|x,y| x[1]<=>y[1]}
 
-  graph = "digraph {\n" +  
-    exclude_addr.map {|addr| 
-      x=Address.find_by_addr(addr[0]);  
-      %Q( "#{x.tag ? x.tag + ' @'+x.addr[-4,4] : x.addr }" [shape=doubleoctagon style=filled] ) + ";\n" + 
-      %Q( "group @#{x.addr[-4,4]} trans #{addr[1]+addr[2]}"[style=filled] ) + ";\n" +
-      %Q( "#{x.tag ? x.tag + ' @'+x.addr[-4,4] : x.addr }" -> "group @#{x.addr[-4,4]} trans #{addr[1]+addr[2]}" [label=#{addr[3].round(2)}] ) + ";\n" +
-      %Q( "group @#{x.addr[-4,4]} trans #{addr[1]+addr[2]}" -> "#{x.tag ? x.tag + ' @'+x.addr[-4,4] : x.addr }" [label=#{addr[4].round(2)}] ) + ";\n"
-    }.join("") + 
-    Transfer.where(from:addr_list).where(to:addr_list).where("amount > ?",min_amount * 1e18).map {|x|
-      %Q( "#{x.ar_from.tag ? x.ar_from.tag + ' @'+x.from[-4,4] : x.from }" -> "#{ x.ar_to.tag ? x.ar_to.tag + ' @'+x.to[-4,4] : x.to}" [label=#{(x.amount/1e18).round(2)}] )
-    }.join(";\n") + "\n}"
-  url = "https://quickchart.io/graphviz?graph=#{graph.gsub(/\n/,"")}"
-  body = Faraday.get(url).body
-  IRuby.html body
+    panbot_account_list = bet_transfer_ratio.filter {|x| not( x[1]<=0.05 ) }.map {|x| x[0]}
+    money_account_list = bet_transfer_ratio.filter {|x| x[1]<=0.05  }.map {|x| x[0]}
+
+    puts "panbot_account_list.count = #{panbot_account_list.count}"
+    puts "money_account_list.count = #{money_account_list.count}"
+
+    panbot_account_list.each_with_index {|x,i| addr=Address.find_by_addr(x);addr.tag="#{name} bot #{i}"; addr.save}
+    money_account_list.each_with_index {|x,i| addr=Address.find_by_addr(x);addr.tag="#{name} money #{i}"; addr.save}
+    
 end
 
+def auto_tag(tagspace,addr)
+  used_tag = Address.where('tag is not null').filter {|x| tagspace.include?(x.tag.split(" ")[0]) }.map {|x| x.tag.split(" ")[0]}.uniq
+  open_tag = tagspace-used_tag
+
+  auto_tag_name(addr,open_tag.pop)
+end
