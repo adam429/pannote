@@ -6,7 +6,7 @@ FROM ruby:2.7.5 AS base
 RUN apt-get update -qq && apt-get install -y nodejs postgresql-client
 RUN apt-get update -qq && apt-get install -y python3 python3-pip python3-venv
 RUN apt-get update -qq && apt-get install -y libtool libffi-dev make libzmq3-dev libczmq-dev
-RUN apt-get update -qq && apt-get install -y graphviz
+RUN apt-get update -qq && apt-get install -y graphviz awscli
 
 RUN gem install ffi-rzmq
 RUN gem install iruby --pre
@@ -36,7 +36,8 @@ RUN gem install \
         graphviz \
         faraday \
         vega \
-        resolv-replace
+        resolv-replace \
+        method_source
 RUN gem install eth -v '0.4.17'
 
 WORKDIR /panworker
