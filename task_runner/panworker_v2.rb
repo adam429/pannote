@@ -3,8 +3,6 @@ require 'faraday'
 
 ActiveRecord::Base.establish_connection(ENV["DB_CONNECT_STR"])
 
-Task.run_loop(ENV["WORKER_NAME"])
-
 def run_code(code,model)
   open("#{model}.rb","w") {|f| f.write(code) }
   load "./#{model}.rb"
@@ -28,3 +26,6 @@ models.each do |model|
   body = http_get(url)
   run_code(body,model)
 end
+
+puts "==start run_loop=="
+Task.run_loop(ENV["WORKER_NAME"])
