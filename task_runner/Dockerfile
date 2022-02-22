@@ -37,14 +37,15 @@ RUN gem install \
         faraday \
         vega \
         resolv-replace \
-        method_source
+        method_source \
+        parser \
+        unparser
 RUN gem install eth -v '0.4.17'
 
 WORKDIR /panworker
 # COPY Gemfile /panscan/Gemfile
 # COPY Gemfile.lock /panscan/Gemfile.lock
-COPY panworker.rb /panworker/panworker.rb
-COPY panbot_note.rb /panworker/panbot_note.rb
+COPY panworker_v2.rb /panworker/panworker.rb
 
 # Configure the main process to run when running the image
 CMD ["ruby", "panworker.rb"]
