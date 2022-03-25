@@ -39,7 +39,8 @@ RUN gem install \
         resolv-replace \
         method_source \
         parser \
-        unparser
+        unparser \
+        opal
 RUN gem install eth -v '0.4.17'
 
 WORKDIR /panworker
