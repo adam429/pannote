@@ -4,8 +4,6 @@ RUN apt-get update -qq && apt-get install -y python3 python3-pip python3-venv
 RUN apt-get update -qq && apt-get install -y libtool libffi-dev make libzmq3-dev libczmq-dev
 RUN apt-get update -qq && apt-get install -y graphviz awscli
 
-RUN npm install hardhat
-
 RUN gem install ffi-rzmq
 RUN gem install iruby --pre
 RUN gem install \
