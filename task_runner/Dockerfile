@@ -40,7 +40,9 @@ RUN gem install \
         method_source \
         parser \
         unparser \
-        opal
+        opal \
+        redis-objects \
+        connection_pool
 RUN gem install eth -v '0.4.17'
 
 WORKDIR /panworker
