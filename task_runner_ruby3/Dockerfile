@@ -1,8 +1,8 @@
-# docker build -t adam429/pan-repo:panworker .
-# docker push adam429/pan-repo:panworker
-# docker container run -d -e DB_CONNECT_STR='xxx' -e WORKER_NAME='worker' --name panworker adam429/pan-repo:panworker
+# docker build -t adam429/pan-repo:panworker_ruby3 .
+# docker push adam429/pan-repo:panworker_ruby3
+# docker container run -d -e DB_CONNECT_STR='xxx' -e WORKER_NAME='worker' --name panworker adam429/pan-repo:panworker_ruby3
 
-FROM ruby:2.7.5 AS base
+FROM ruby:3.1.2 AS base
 RUN apt-get update -qq && apt-get install -y nodejs postgresql-client
 RUN apt-get update -qq && apt-get install -y python3 python3-pip python3-venv
 RUN apt-get update -qq && apt-get install -y libtool libffi-dev make libzmq3-dev libczmq-dev
