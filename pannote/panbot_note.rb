@@ -7,6 +7,7 @@ require 'histogram/array'
 require 'parallel'
 require 'resolv-replace'
 require 'vega'
+require 'opal'
 
 
 contract_name = "PancakePredictionV2"
