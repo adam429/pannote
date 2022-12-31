@@ -8,12 +8,12 @@ require 'parallel'
 require 'resolv-replace'
 require 'vega'
 require 'opal'
-
+require 'dotenv'
+Dotenv.load("/work/.env")
 
 contract_name = "PancakePredictionV2"
 contract_addr = "0x18B2A687610328590Bc8F2e5fEdDe3b582A49cdA".downcase
 bscscan_apikey = "HIFNPQFV6MY755QMVPFIAY7F25RUTHI26Z"
-
 
 ActiveRecord::Base.establish_connection(ENV["DB_CONNECT_STR"])
 
